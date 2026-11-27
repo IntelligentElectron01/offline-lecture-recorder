@@ -1,0 +1,7 @@
+# Dev/test-only dependencies (see docs/dependencies.md).
+-r requirements.in
+pytest==9.1.1
+jiwer==4.0.0
+pip-audit==2.10.1
+psutil==7.2.2
+httpx==0.28.1

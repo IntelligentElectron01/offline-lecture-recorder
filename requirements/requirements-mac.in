@@ -1,0 +1,22 @@
+# Top-level runtime dependencies for macOS (Apple Silicon, Python 3.13): the same set as requirements.in,
+# with torch/torchaudio from PyPI (the CPU/Metal build) instead of the Windows CUDA wheels.
+# Every package below is listed with its purpose in docs/dependencies.md.
+# Top-level runtime dependencies (see docs/dependencies.md).
+torch==2.14.0
+torchaudio==2.11.0
+torchcodec==0.16.0
+pyannote.audio==4.0.7
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+numpy==2.5.3
+fastapi==0.141.1
+uvicorn==0.53.0
+jinja2==3.1.6
+python-dotenv==1.2.3
+python-multipart==0.0.32
+sounddevice==0.5.6
+soundfile==0.14.0
+ollama==0.6.2
+
+# Security floors for transitive packages
+requests>=2.33

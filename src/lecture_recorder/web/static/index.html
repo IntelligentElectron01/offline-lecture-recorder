@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lecture Recorder</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">Lecture Recorder</a>
+    <nav><a href="#/">Library</a></nav>
+    <a id="queue-pill" class="queue-pill" href="#/" hidden><span class="pbar mini" aria-hidden="true"><span class="pbar-fill"></span></span><span id="queue-pill-text"></span></a>
+    <form id="search-form" class="searchbar" role="search">
+      <input id="search-q" type="search" placeholder="Search transcripts" aria-label="Search transcripts" maxlength="500">
+      <select id="search-mode" aria-label="Search type">
+        <option value="exact">Exact words</option>
+        <option value="concept">By meaning</option>
+      </select>
+      <button type="submit">Search</button>
+    </form>
+    <button id="theme-toggle" class="ghost" type="button" aria-label="Switch light/dark theme">Dark</button>
+    <button id="quit" class="ghost" type="button" title="Close Lecture Recorder (the server in the console window)">Quit</button>
+  </header>
+
+  <section id="recbar" class="recbar" hidden aria-live="polite">
+    <div class="recbar-main">
+      <span id="rec-dot" class="rec-dot" aria-hidden="true"></span>
+      <strong id="rec-label">REC</strong>
+      <span id="rec-time" class="mono">00:00:00</span>
+      <span id="rec-class" class="muted"></span>
+      <span id="rec-source" class="muted"></span>
+      <span id="rec-reason" class="muted"></span>
+      <meter id="rec-level" class="rec-level" min="-60" max="0" low="-45" high="-6" optimum="-20" value="-60"
+             aria-label="Microphone input level" title="Microphone input level"></meter>
+      <strong id="rec-noaudio" class="rec-noaudio" role="alert" hidden>No audio detected — check your microphone</strong>
+      <span class="spacer"></span>
+      <button id="rec-pause" type="button">Pause</button>
+      <button id="rec-resume" type="button" hidden>Resume</button>
+      <button id="rec-bookmark" type="button">Bookmark</button>
+      <button id="rec-stop" type="button" class="danger">Stop</button>
+    </div>
+    <p class="recbar-reminder" id="rec-reminder">You are responsible for getting permission before recording anyone.</p>
+  </section>
+
+  <main id="view" tabindex="-1"></main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <div id="progress-live" class="sr-only" aria-live="polite"></div>
+</body>
+</html>

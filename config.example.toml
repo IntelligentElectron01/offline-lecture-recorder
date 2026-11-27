@@ -1,0 +1,49 @@
+# Copy to config.toml (git-ignored) to override defaults. All paths are relative to this file.
+
+[paths]
+data_dir = "data"
+models_dir = "models"
+
+[server]
+host = "127.0.0.1"   # never change to 0.0.0.0: the app is local-only
+port = 8765
+
+[processing]
+mode = "manual"                 # manual: you press Process now / Process all pending | auto: when plugged in
+                                # (GPU jobs never start while recording or on battery, in either mode)
+keep_awake = true               # no idle sleep while jobs are queued and running; closing the lid or
+                                # choosing Sleep still follows Windows' own settings
+
+[retention]
+delete_original_after_opus = false  # keep the original (WAV, m4a, mp3, ...) after its verified Opus copy (deletion is permanent;
+                                    # the older name delete_wav_after_opus still works)
+trash_days = 0                  # empty Recently deleted after this many days (0 = never; permanent)
+
+[naming]
+template = ""                   # default title of new lectures, e.g. "{class} {date} Lecture {n}"
+                                # ({class} {date} {time} {n} {original}); empty: date-time / file name
+
+[recording]
+sample_rate = 16000
+max_length_minutes = 120        # auto-stop (per-class override in class.json)
+silence_pause_minutes = 10      # auto-pause after near-silence
+pause_on_sleep = true           # pause on sleep/lid close; stays paused after wake
+
+[transcription]
+device = "auto"                 # auto | cuda | cpu
+model = "auto"                  # auto (hardware tier) | large-v3-turbo | distil-large-v3.5
+compute_type = "auto"           # auto: int8_float16 on CUDA, int8 on CPU
+beam_size = 5
+language = "en"
+
+[llm]
+ollama_host = "http://127.0.0.1:11434"   # loopback IP only; anything else is refused
+summary_model = "qwen3:8b"
+embedding_model = "qwen3-embedding:0.6b"
+num_ctx = 8192                  # set on every request (a larger window needs more GPU memory: 8192 suits an 8 GB card, 4096 a 6 GB card); Ollama's own default is untouched
+max_prompt_tokens = 5000        # longer transcripts are split into chunks (map-reduce), never truncated
+num_predict = 2000              # output cap per request; prompt + output always fits in num_ctx
+
+[diarization]
+# min_speakers = 1              # optional hints; left unset until tuned on real recordings
+# max_speakers = 6

@@ -1,0 +1,66 @@
+# --- User data: recordings, transcripts, summaries, exports, index ---
+data/
+*.wav
+*.opus
+*.ogg
+*.flac
+*.mp3
+*.m4a
+*.aac
+*.pcm
+*.webm
+*.mp4
+*.mov
+*.mkv
+*.wma
+*.aif
+*.aiff
+
+# --- Test fixtures that are private or generated ---
+tests/fixtures/private/
+tests/fixtures/synthetic/
+
+# --- Runtime lock files and the local login key ---
+.gpu.lock
+.app-token-*
+
+# --- Secrets and local config ---
+.env
+.env.*
+!.env.example
+config.toml
+config.auto.toml
+
+# --- Model files and caches ---
+models/
+*.bin
+*.safetensors
+*.onnx
+*.ckpt
+*.pt
+*.pth
+*.gguf
+.cache/
+.fresh*/
+hf_cache/
+
+# --- Virtual environment and Python build artifacts ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- OS / editor ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vscode/
+.idea/

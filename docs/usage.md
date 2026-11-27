@@ -1,0 +1,37 @@
+# Using the app
+
+## Run
+Double-click **`run.bat`** (or the Desktop shortcut). The app opens at http://127.0.0.1:8765 in your browser. Only this computer can reach that address, and only the browser window the app opened is signed in: running `run.bat` again opens the running app again. After the app is restarted, a tab that was open before shows a message; start `run.bat` once more to reopen it.
+
+1. Add a class (for example "Physics 101"). You can set its auto-stop length.
+2. Choose the class and press **Start recording**. A red **REC** bar shows while recording.
+3. Press **Stop**. The recording is saved and marked **Not processed**. When you are plugged in, press **Process now** on the lecture, or **Process all pending** on the Library page: the lecture is transcribed (speakers are labeled; the main voice is Speaker 1), summarized, and indexed for search. Processing uses the graphics card and never starts while recording or on battery; queued work waits and the app says why. Under **Processing and storage** you can switch to **Automatic when plugged in**. **Keep the laptop awake while processing** (on by default) prevents idle sleep only: closing the lid or choosing Sleep still follows Windows' own settings. Click any transcript line to hear that moment, or **Edit transcript** to fix words or speakers.
+4. After the transcript, a **summary** is written by the local model (Ollama must be running): an at-a-glance list with **Detailed notes** you can expand, saved as `summary.md`. If you edit that file, the app never replaces it; to get a fresh summary, rename or remove it and press **Summarize**.
+5. **Import a recording** accepts wav, mp3, m4a, opus, ogg, flac, or mp4 video (only the sound is kept). You can pick several files at once. Each becomes its own lecture, named from the file and dated from the recording date stored in it (or the file's date). If an import looks like a lecture you already have, the app says so.
+6. **Online classes:** under **Record from**, choose **An app (e.g. Zoom)** to record just that app's sound (see [Recording a Zoom class](#recording-a-zoom-class)).
+
+While recording, the REC bar shows a **level meter**. If the microphone hears nothing usable for about 10 seconds (muted, disconnected or wrongly configured), it shows **No audio detected**, and again for later silent stretches. A file that turns out to be silent is marked **No usable audio** instead of giving an empty transcript; you can still press **Transcribe anyway**.
+
+### Phone and tablet recordings (stay local)
+Recordings never need to leave your own devices. Copy the files from the device to this computer with a cable or a USB drive, then use **Import a recording**. The app copies each file into a lecture folder under `data\`; the original is not changed. Avoid cloud sync, email and chat apps: classmates and instructors agreed to a recording for your own study, not to having it stored on someone else's servers. Many voice-recorder apps sync to a cloud account by default; check that setting on the device.
+
+### Smaller files after processing
+After a lecture is transcribed, the app makes a compact `audio.opus` copy of its audio (about 20 MB per hour, whatever the original format was) and checks it against the original. Your original (a WAV is about 115 MB per hour) is kept unless you turn on **Delete the original after a verified Opus copy** under **Processing and storage**; deletion is permanent, so the app asks first, and only the copy made by the app inside `data\` is ever involved (your own files elsewhere are never touched). `lecture-recorder compact --dry-run` shows what compaction would do for lectures that don't have a copy yet and how many bytes it would free; `lecture-recorder compact` then does it after you type DELETE.
+
+### Deleting lectures and classes
+**Delete** (on a lecture's page or in its class list) and **Delete class…** (bottom of a class page) move them to **Recently deleted** (link under Classes in the Library); nothing is gone yet. **Restore** puts it back exactly where it was, and **Delete permanently…** removes it after you type its name. A lecture that is recording or being processed can't be deleted until it has finished. Nothing is removed automatically unless you choose **Empty Recently deleted after N days**. Terminal: `lecture-recorder delete <class> [<lecture>]`, `restore <id>`, `trash list`, `trash empty`.
+
+## Recording a Zoom class
+**Record from → An app** lists the programs that have sound open right now, with Zoom first. Pick Zoom once you're in the meeting (press **Refresh list** if it isn't there yet) and press **Start recording**. Needs Windows 11, or Windows 10 version 21H2 or later (build 20348+).
+
+- **Only that app's sound is recorded:** music, videos or notification sounds from other programs aren't. Your own microphone isn't recorded either (Zoom doesn't play your voice back to you), so your questions aren't in the recording unless you tick **Also include my microphone**.
+- **Volume:** the recording level does **not** depend on your system volume or mute. It **does** depend on Zoom's own speaker volume, and on Zoom's slider and mute in Windows' **Volume Mixer**: turning those down or muting them makes the recording quieter or silent. If the REC bar says **No audio from Zoom**, check those first. A meeting where nobody is talking shows the same warning.
+- **Stopping:** press **Stop**, or just close Zoom: the recording stops and is saved by itself. If the meeting ends but Zoom stays open, the recording pauses after 10 minutes of silence; press **Stop** then. The class's auto-stop length still applies.
+
+### What Zoom and the other participants can and can't see
+- The app reads the sound Zoom plays on **your own computer**, through Windows: the same sound you hear. It never connects to Zoom or its servers, never signs in, and never changes, injects anything into or automates Zoom. It doesn't use Zoom's own **Record** button, so Zoom has nothing to announce: **no "This meeting is being recorded" notice appears for anyone**. The app does not hide or suppress any notice that Zoom itself shows.
+- Zoom could in principle notice other programs running on your computer. There is no indication that it does this, but nothing can promise it never will. You can check with a test meeting at https://zoom.us/test (a test meeting only, not a real class).
+- **Because no one is notified, permission is entirely your responsibility.** Get the instructor's permission (and follow your school's rules and local recording laws; some places require everyone's consent). Consider telling the class too. The reminder in the REC bar stays on screen for this reason.
+
+### Importing Zoom's own recordings
+Use **Import a recording → Or a Zoom recording folder** and pick the meeting's folder: a local recording (`Documents\Zoom\<date time topic>\`) or a downloaded cloud recording. The app uses the audio-only `.m4a` (or the sound of the `.mp4` if there's no m4a) and takes the date and topic from the folder name. Zoom's transcript (`.vtt`) and chat are kept next to the lecture. Separate per-participant audio files are not imported. If the folder has only `double_click_to_convert` files, double-click one, wait for Zoom to finish converting, then import. Files are only copied into your data folder, never uploaded anywhere. Terminal: `lecture-recorder import-zoom "<folder>" --class <class>`.
