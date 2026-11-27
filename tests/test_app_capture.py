@@ -18,6 +18,9 @@ import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
+if sys.platform != "win32":
+    pytest.skip("Windows process loopback and Zoom-on-Windows tests", allow_module_level=True)
+
 import lecture_recorder  # noqa: F401  (lockdown)
 from lecture_recorder import importer as imp
 from lecture_recorder import library as lib

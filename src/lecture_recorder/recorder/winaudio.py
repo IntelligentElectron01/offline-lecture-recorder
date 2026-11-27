@@ -16,6 +16,9 @@ import threading
 
 import numpy as np
 
+if sys.platform != "win32":  # the Windows types and calls below do not exist elsewhere
+    raise ImportError("recorder.winaudio is Windows-only")
+
 HRESULT = ctypes.c_long
 S_OK = 0
 E_NOINTERFACE = 0x80004002 - (1 << 32)

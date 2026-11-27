@@ -187,7 +187,7 @@ def test_configure_json_for_the_settings_page_is_pure_ascii(monkeypatch, capsys,
 
 
 def test_windows_10_and_11_decide_app_capture_by_build(monkeypatch):
-    from lecture_recorder.recorder import winaudio
+    winaudio = pytest.importorskip("lecture_recorder.recorder.winaudio")
 
     monkeypatch.setattr(sys, "platform", "win32")
     for build, ok in ((19045, False), (20348, True), (22000, True), (26100, True)):

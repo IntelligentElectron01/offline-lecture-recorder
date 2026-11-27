@@ -227,7 +227,7 @@ def test_app_recording_is_refused_in_the_api_and_the_terminal(mac_app, capsys, m
 
 
 def test_windows_still_offers_it_and_keeps_its_exact_reply(tmp_path, monkeypatch):
-    from lecture_recorder.recorder import winaudio
+    winaudio = pytest.importorskip("lecture_recorder.recorder.winaudio")
 
     monkeypatch.setattr(winaudio, "supported", lambda: None)
     h = WindowsHost()
@@ -375,6 +375,16 @@ def test_importing_the_app_does_not_need_the_windows_files(monkeypatch):
     code = ("import sys; sys.modules['lecture_recorder.recorder.winaudio'] = None; "
             "import lecture_recorder.web.app, lecture_recorder.cli, lecture_recorder.pipeline.queue, "
             "lecture_recorder.recorder.control, lecture_recorder.autoconfig, lecture_recorder.machine; print('ok')")
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120,
+                       cwd=Path(__file__).resolve().parents[1])
+    assert r.returncode == 0 and "ok" in r.stdout, r.stderr[-500:]
+
+
+def test_the_app_picker_is_empty_and_safe_without_the_windows_audio_module():
+    """On another OS recorder/apps.py is importable and lists nothing (winaudio cannot be imported there)."""
+    code = ("import sys; sys.modules['lecture_recorder.recorder.winaudio'] = None; real = sys.platform; sys.platform = 'darwin'; "
+            "from lecture_recorder.recorder import apps; sys.platform = real; "
+            "assert apps.winaudio is None and apps.list_audio_apps() == [] and apps.find_app(1) is None; print('ok')")
     r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120,
                        cwd=Path(__file__).resolve().parents[1])
     assert r.returncode == 0 and "ok" in r.stdout, r.stderr[-500:]

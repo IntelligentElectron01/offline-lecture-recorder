@@ -1,7 +1,11 @@
 """The "Record from an app" picker: apps with an audio session on the default output, Zoom first."""
+import sys
 from pathlib import Path
 
-from lecture_recorder.recorder import winaudio
+if sys.platform == "win32":
+    from lecture_recorder.recorder import winaudio
+else:  # no per-app capture on this OS: the picker is empty
+    winaudio = None
 
 MEETING_APPS = ("zoom.exe",)  # listed first when present
 
@@ -22,6 +26,8 @@ def _root(pid: int, table: dict[int, tuple[int, str]]) -> int:
 def list_audio_apps() -> list[dict]:
     """[{pid, exe, name, active}] one row per app, Zoom first, then playing apps, then by name.
     `active` = the app has an open audio stream right now (e.g. Zoom while in a meeting)."""
+    if winaudio is None:
+        return []
     table = winaudio.process_table()
     apps: dict[int, dict] = {}
     for pid, active in winaudio.audio_sessions():
