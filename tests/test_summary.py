@@ -84,12 +84,14 @@ def fake_llm(fake: FakeOllama, **kw) -> LocalLLM:
 @pytest.fixture(scope="module", autouse=True)
 def synthetic_fixture():
     """The synthetic fixture is git-ignored and generated (CPU only, offline SAPI voices): make it when a
-    fresh clone doesn't have it yet (found by the fresh-install test)."""
+    fresh clone doesn't have it yet (found by the fresh-install test). These tests only read its script, so
+    on other systems the text-only form is enough."""
     if not FIXTURE_TRUTH.exists():
         import subprocess
         import sys
 
-        subprocess.run([sys.executable, str(ROOT / "scripts" / "dev" / "make_synthetic_fixture.py")], check=True,
+        extra = [] if sys.platform == "win32" else ["--text-only"]
+        subprocess.run([sys.executable, str(ROOT / "scripts" / "dev" / "make_synthetic_fixture.py"), *extra], check=True,
                        capture_output=True, timeout=300)
 
 

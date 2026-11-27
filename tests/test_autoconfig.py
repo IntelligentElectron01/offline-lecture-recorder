@@ -6,6 +6,7 @@ import pytest
 import lecture_recorder  # noqa: F401  (lockdown)
 from lecture_recorder import autoconfig as ac
 from lecture_recorder.config import load_config
+from lecture_recorder.host import host
 
 ALL_MODELS = {"large-v3-turbo": True, "distil-large-v3.5": True, "pyannote": True}
 OLLAMA_OK = {"installed": True, "reachable": True, "models": ["qwen3-embedding:0.6b", "qwen3:8b"]}
@@ -162,7 +163,7 @@ def test_broken_auto_file_is_ignored_and_configure_repairs_it(tmp_path, monkeypa
 def test_auto_without_a_pick_means_the_default_and_bad_numbers_are_refused(tmp_path):
     (tmp_path / "config.toml").write_text('[transcription]\nbatch_size = "auto"\ncpu_threads = "auto"\n', encoding="utf-8")
     t_cfg = load_config(tmp_path).transcription
-    assert t_cfg.batch_size == 0 and t_cfg.cpu_threads == ac.default_threads()  # one value for Whisper and pyannote
+    assert t_cfg.batch_size == 0 and t_cfg.cpu_threads == ac.default_threads(None, host().perf_cores())  # one value for Whisper and pyannote
     (tmp_path / "config.toml").write_text('[transcription]\ncpu_threads = "lots"\n', encoding="utf-8")
     with pytest.raises(ValueError):
         load_config(tmp_path)

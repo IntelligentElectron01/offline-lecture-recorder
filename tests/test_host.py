@@ -120,6 +120,7 @@ def test_facts_name_the_chip_and_rosetta(fake_cmds, monkeypatch):
 
 
 # ------------------------------------------------------------------ processes
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows process flags")
 def test_windows_spawn_flags_are_exactly_what_they_were():
     h = WindowsHost()
     flags = h.job_spawn_kwargs()["creationflags"]
@@ -226,8 +227,9 @@ def test_app_recording_is_refused_in_the_api_and_the_terminal(mac_app, capsys, m
     assert not list((cfg.data_dir / "classes" / "physics-101" / "sessions").glob("*")) if (cfg.data_dir / "classes" / "physics-101" / "sessions").exists() else True
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="per-app capture is Windows-only")
 def test_windows_still_offers_it_and_keeps_its_exact_reply(tmp_path, monkeypatch):
-    winaudio = pytest.importorskip("lecture_recorder.recorder.winaudio")
+    from lecture_recorder.recorder import winaudio
 
     monkeypatch.setattr(winaudio, "supported", lambda: None)
     h = WindowsHost()

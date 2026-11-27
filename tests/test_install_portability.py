@@ -11,6 +11,7 @@ import pytest
 import lecture_recorder  # noqa: F401  (lockdown)
 from lecture_recorder import autoconfig as ac
 from lecture_recorder.config import load_config
+from lecture_recorder.host import host
 from test_portability import doctor_out, profile
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,14 +107,14 @@ def test_doctor_on_a_small_cpu_only_machine_with_a_tight_disk(monkeypatch, capsy
     assert code == 0  # warnings, not failures: the app still works
     assert "[--] 6 GB of RAM" in out and "[--] Only 9 GB free" in out
     assert "AMD and Intel graphics are not used" in out
-    assert "Next: double-click run.bat" in out
+    assert f"Next: {host().start_text}" in out
 
 
 def test_doctor_failure_ends_with_the_next_step(monkeypatch, capsys, tmp_path):
     code, out = doctor_out(monkeypatch, capsys, tmp_path,
                            models={"large-v3-turbo": False, "distil-large-v3.5": False, "pyannote": True})
     assert code == 1 and ac.DOWNLOAD_HINTS["large-v3-turbo"] in out
-    assert "Each [!!] line above says what to do" in out and "INSTALL.bat" in out
+    assert "Each [!!] line above says what to do" in out and host().installer_name in out
 
 
 @pytest.mark.parametrize("build,name,ok", [(19041, "Windows 10", True), (19045, "Windows 10", True),
@@ -128,6 +129,7 @@ def test_doctor_reports_the_windows_version(monkeypatch, capsys, short_home, bui
     assert (code == 0) is ok and ("too old" in out) is (not ok)
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="the OneDrive check is part of the Windows checks")
 @pytest.mark.parametrize("folder", ["OneDrive", "onedrive-school", "plain"])
 def test_doctor_warns_about_onedrive_without_failing(monkeypatch, capsys, tmp_path_factory, folder):
     home = tmp_path_factory.mktemp(folder)  # short, so the 100-character path limit isn't what fails here
@@ -186,8 +188,9 @@ def test_configure_json_for_the_settings_page_is_pure_ascii(monkeypatch, capsys,
     assert json.loads(out)["settings"]["transcription"]["device"] == "cpu"
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="per-app capture is Windows-only")
 def test_windows_10_and_11_decide_app_capture_by_build(monkeypatch):
-    winaudio = pytest.importorskip("lecture_recorder.recorder.winaudio")
+    from lecture_recorder.recorder import winaudio
 
     monkeypatch.setattr(sys, "platform", "win32")
     for build, ok in ((19045, False), (20348, True), (22000, True), (26100, True)):

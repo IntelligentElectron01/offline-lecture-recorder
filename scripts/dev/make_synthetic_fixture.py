@@ -118,7 +118,8 @@ def write_wav(path: Path, x: np.ndarray) -> None:
         w.writeframes(x.tobytes())
 
 
-def build(out: Path, snr_db: float) -> dict:
+def build(out: Path, snr_db: float, text_only: bool = False) -> dict:
+    """text_only: no audio and no voices (any OS): the script and its turns with times estimated from the word count."""
     out.mkdir(parents=True, exist_ok=True)
     gaps = [0.7, 0.9, 0.6, 0.8]  # seconds of silence between turns, cycled (deterministic)
     pieces = [np.zeros(int(0.5 * RATE), np.int16)]
@@ -126,7 +127,7 @@ def build(out: Path, snr_db: float) -> dict:
     turns = []
     for i, (spk, text) in enumerate(SCRIPT):
         name, rate, pitch = VOICES[spk]
-        audio = trim(speak(text, name, rate, pitch))
+        audio = np.zeros(int(0.4 * len(text.split()) * RATE), np.int16) if text_only else trim(speak(text, name, rate, pitch))
         turns.append({"speaker": spk, "role": ROLES[spk], "start": round(pos / RATE, 3),
                       "end": round((pos + audio.size) / RATE, 3), "text": text})
         gap = np.zeros(int(gaps[i % len(gaps)] * RATE), np.int16)
@@ -137,14 +138,15 @@ def build(out: Path, snr_db: float) -> dict:
     for t in turns:
         mask[int(t["start"] * RATE): int(t["end"] * RATE)] = True
     noisy = add_noise(clean, mask, snr_db)
-    write_wav(out / "lecture_clean.wav", clean)
-    write_wav(out / "lecture_noisy.wav", noisy)
+    if not text_only:
+        write_wav(out / "lecture_clean.wav", clean)
+        write_wav(out / "lecture_noisy.wav", noisy)
 
     speech = {}
     for t in turns:
         speech[t["speaker"]] = speech.get(t["speaker"], 0) + t["end"] - t["start"]
     truth = {
-        "generator": "scripts/dev/make_synthetic_fixture.py (Windows SAPI)",
+        "generator": "scripts/dev/make_synthetic_fixture.py (text only)" if text_only else "scripts/dev/make_synthetic_fixture.py (Windows SAPI)",
         "sample_rate": RATE,
         "duration_s": round(clean.size / RATE, 3),
         "known_phrase": KNOWN_PHRASE,
@@ -162,10 +164,11 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", type=Path, default=Path(__file__).resolve().parents[2] / "tests" / "fixtures" / "synthetic")
     ap.add_argument("--snr-db", type=float, default=10.0)
+    ap.add_argument("--text-only", action="store_true", help="write only truth.json (no audio, no voices; works on any OS)")
     args = ap.parse_args(argv)
-    if sys.platform != "win32":
-        raise SystemExit("The synthetic fixture uses Windows SAPI voices.")
-    truth = build(args.out, args.snr_db)
+    if sys.platform != "win32" and not args.text_only:
+        raise SystemExit("The synthetic audio uses Windows SAPI voices (use --text-only for the script alone).")
+    truth = build(args.out, args.snr_db, args.text_only)
     share = truth["speech_s"]["main"] / sum(truth["speech_s"].values())
     print(f"wrote {args.out}: {truth['duration_s']:.1f} s, {len(truth['turns'])} turns, "
           f"main speaker {share:.0%} of speech, noisy copy at {args.snr_db:g} dB SNR")

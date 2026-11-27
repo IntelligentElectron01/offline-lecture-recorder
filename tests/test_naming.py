@@ -286,7 +286,7 @@ def test_import_applies_the_template_and_empty_keeps_file_names(cfg, cls, tmp_pa
 
 def test_zoom_import_applies_the_template(cfg, cls, tmp_path, monkeypatch):
     from lecture_recorder import cli
-    from test_app_capture import zoom_folder
+    from test_zoom_import import zoom_folder
 
     f = zoom_folder(tmp_path, m4a=True)
     templated = dataclasses.replace(cfg, naming=NamingConfig("{class} {date} Lecture {n} [{original}]"))

@@ -17,7 +17,8 @@ LOCKS = [ROOT / "requirements" / "runtime-win-py313.lock", LOCK]
 
 
 def test_installed_versions_match_lock():
-    pins = re.findall(r"^([A-Za-z0-9_.\-]+)(?:==(\S+)| @ (\S+))", LOCK.read_text(encoding="utf-8"), re.M)
+    lock = ROOT / "requirements" / ("dev-mac-py313.lock" if sys.platform == "darwin" else "dev-win-py313.lock")
+    pins = re.findall(r"^([A-Za-z0-9_.\-]+)(?:==(\S+)| @ (\S+))", lock.read_text(encoding="utf-8"), re.M)
     assert len(pins) >= 100
     mismatches = []
     for name, version, url in pins:
@@ -27,7 +28,8 @@ def test_installed_versions_match_lock():
         if installed != version:
             mismatches.append((name, version, installed))
     assert mismatches == []
-    assert md.version("torch") == "2.14.0+cu126" and md.version("torchaudio") == "2.11.0+cu126"
+    cuda = "+cu126" if sys.platform == "win32" else ""  # the Mac locks use the PyPI builds
+    assert md.version("torch") == "2.14.0" + cuda and md.version("torchaudio") == "2.11.0" + cuda
 
 
 @pytest.mark.parametrize("lock", LOCKS, ids=lambda p: p.name)

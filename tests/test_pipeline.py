@@ -26,6 +26,8 @@ SESSION = "classes/m2-synthetic/sessions/2026-09-30_10-00-00"
 # ------------------------------------------------------------------ fixture
 @pytest.fixture(scope="session")
 def synthetic(tmp_path_factory):
+    if sys.platform != "win32":
+        pytest.skip("the synthetic audio uses Windows SAPI voices")
     out = tmp_path_factory.mktemp("synthetic")
     r = subprocess.run([sys.executable, str(ROOT / "scripts" / "dev" / "make_synthetic_fixture.py"), "--out", str(out)],
                        capture_output=True, text=True, timeout=300)

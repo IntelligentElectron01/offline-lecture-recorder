@@ -105,7 +105,10 @@ def test_server_listens_on_127_0_0_1_only(tmp_path):
         else:
             pytest.fail("server did not start")
         # every socket listening on this port, from any process (the venv launcher runs the server as a child)
-        listening = [c for c in psutil.net_connections(kind="inet") if c.status == psutil.CONN_LISTEN and c.laddr.port == port]
+        # (per process: the system-wide listing needs root on macOS, but a process may list its own and its children's)
+        me = psutil.Process(proc.pid)
+        sockets = [c for p in [me, *me.children(recursive=True)] for c in p.net_connections(kind="inet")]
+        listening = [c for c in sockets if c.status == psutil.CONN_LISTEN and c.laddr.port == port]
         assert listening and all(c.laddr.ip == "127.0.0.1" for c in listening), listening
     finally:
         proc.terminate()
