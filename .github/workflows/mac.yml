@@ -1,6 +1,6 @@
 name: macos
 
-# Apple Silicon (macos-14). Installs from the hash-pinned Mac lock, then runs the tests that need no special
+# Apple Silicon (macos-15; the app needs macOS 14 or newer). Installs from the hash-pinned Mac lock, then runs the tests that need no special
 # hardware. It only runs once requirements/dev-mac-py313.lock exists. No secrets and no real data are used.
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
   tests:
     # Runs on public repositories (standard macOS runners).
     if: ${{ !github.event.repository.private }}
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
